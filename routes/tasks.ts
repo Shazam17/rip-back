@@ -6,7 +6,7 @@ import {RabbitMQEvents} from "../src/EventTypes";
 
 import jwt from "jsonwebtoken";
 
-const TOKEN_KEY = "TOKENHH"
+const TOKEN_KEY = "TOKENHAHASOSECRET"
 const adapterMQ = new RabbitmqAdapter();
 const router = express.Router();
 
@@ -27,7 +27,7 @@ const verifyToken = (req, res, next) => {
 };
 
 
-router.post('/sign-in', async (req, res) => {
+router.post('/auth', async (req, res) => {
     const token = jwt.sign(
         {data: Math.floor(Math.random() * 1000)},
         TOKEN_KEY,
@@ -38,7 +38,7 @@ router.post('/sign-in', async (req, res) => {
     res.json(new SuccessJsonResponse({token}))
 })
 
-router.get('/get-all', verifyToken, async (req, res) => {
+router.get('/get-all', async (req, res) => {
     try{
         const tasks = await Task.findAll()
         res.json(new SuccessJsonResponse(tasks))
@@ -62,7 +62,7 @@ router.get('/get', async (req, res) => {
     }
 })
 
-router.post('/create',verifyToken, async (req, res) => {
+router.post('/create', async (req, res) => {
     try{
         const {done, label, body} = req.body;
         await adapterMQ.sendEvent(RabbitMQEvents.CREATE_TASK,{done,label,body})
@@ -72,7 +72,7 @@ router.post('/create',verifyToken, async (req, res) => {
     }
 })
 
-router.post('/mark',verifyToken, async (req, res) => {
+router.post('/mark', async (req, res) => {
     try{
         const {id, done} = req.body;
         await adapterMQ.sendEvent(RabbitMQEvents.MARK_DONE,{id, done})
@@ -102,7 +102,7 @@ router.put('/edit', async (req, res) => {
     }
 })
 
-router.delete('/delete',verifyToken, async (req, res) => {
+router.delete('/delete', async (req, res) => {
     try{
         const {id} = req.body;
         await adapterMQ.sendEvent(RabbitMQEvents.DELETE_TASK,{id})
